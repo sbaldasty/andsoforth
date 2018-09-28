@@ -1,8 +1,7 @@
 package com.bitflippin.andsoforth.analysis
 
-import org.junit.Assert
+import org.junit.Assert.assertNotNull
 import org.junit.Test
-import java.io.File
 
 class MacroTest {
 
@@ -12,12 +11,7 @@ class MacroTest {
      */
     @Test
     fun loadsEmptyMacro() {
-        val environment = load("EmptyMacro")
-        Assert.assertNotNull(environment.resolveLocally("EmptyMacro"))
+        val environment = project("EmptyMacro").build()
+        assertNotNull(environment.resolveLocally("EmptyMacro"))
     }
-
-    private fun load(vararg names: String) = Project(names.map {
-        val path = "src/test/resources/andsoforth/$it.andsoforth"
-        Resource(File(path))
-    }).build()
 }
