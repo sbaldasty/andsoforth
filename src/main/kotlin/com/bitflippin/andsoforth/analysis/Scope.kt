@@ -2,7 +2,7 @@ package com.bitflippin.andsoforth.analysis
 
 import org.antlr.v4.runtime.ParserRuleContext
 
-open class Scope(private val parent: Scope? = null) {
+class Scope(private val parent: Scope? = null) {
 
     private val symbolTable = HashMap<String, ParserRuleContext>()
 

@@ -1,8 +1,5 @@
 package com.bitflippin.andsoforth.analysis
 
-import java.io.File
+fun project(sourceCode: String) = Project(listOf(Resource(sourceCode)))
 
-fun project(vararg names: String) = Project(names.map {
-    val path = "src/test/resources/andsoforth/$it.andsoforth"
-    Resource(File(path))
-})
+fun environment(sourceCode: String) = project(sourceCode).build()

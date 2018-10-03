@@ -8,8 +8,9 @@ class Project(private val sources: List<Resource>) {
 
     fun build(): Environment {
         val result = Environment()
-        sources.forEach { errors += it.performSyntacticAnalysis() }
-        sources.forEach { it.performSemanticAnalysis(result) }
+        sources.forEach { errors += it.parse() }
+        sources.forEach { it.createObjects(result) }
+        sources.forEach { it.populateObjects(result) }
         return result
     }
 }

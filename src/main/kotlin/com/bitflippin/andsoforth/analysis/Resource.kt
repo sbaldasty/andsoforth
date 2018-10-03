@@ -3,6 +3,7 @@ package com.bitflippin.andsoforth.analysis
 import com.bitflippin.andsoforth.AndSoForthLexer
 import com.bitflippin.andsoforth.AndSoForthParser
 import com.bitflippin.andsoforth.AndSoForthParser.RootContext
+import com.bitflippin.andsoforth.domain.Macro
 import com.bitflippin.andsoforth.error.AndSoForthError
 import com.bitflippin.andsoforth.error.SyntaxError
 import org.antlr.v4.runtime.BaseErrorListener
@@ -10,15 +11,14 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.RecognitionException
 import org.antlr.v4.runtime.Recognizer
-import java.io.File
 
-class Resource(private val file: File) {
+class Resource(private val sourceCode: String) {
 
     lateinit var root: RootContext
 
-    fun performSyntacticAnalysis(): List<AndSoForthError> {
+    fun parse(): List<AndSoForthError> {
         val result = ArrayList<AndSoForthError>()
-        val charStream = CharStreams.fromFileName(file.path)
+        val charStream = CharStreams.fromString(sourceCode)
         val lexer = AndSoForthLexer(charStream)
         lexer.addErrorListener(object : BaseErrorListener() {
 
@@ -39,7 +39,17 @@ class Resource(private val file: File) {
         return result
     }
 
-    fun performSemanticAnalysis(environment: Environment) {
-        root.macroContexts.forEach { environment.define(it.name, it) }
+    fun createObjects(targetEnvironment: Environment) {
+        root.macroContexts.forEach {
+            targetEnvironment.globalScope.define(it.name, it)
+            targetEnvironment.macros[it.name] = Macro()
+        }
+    }
+
+    fun populateObjects(targetEnvironment: Environment) {
+        root.macroContexts.forEach { macroContext ->
+            val macro = targetEnvironment.macros[macroContext.name] ?: throw IllegalStateException()
+            macroContext.commandContexts.forEach { macro.commands += targetEnvironment.macros[it.text] ?: throw IllegalStateException() }
+        }
     }
 }
