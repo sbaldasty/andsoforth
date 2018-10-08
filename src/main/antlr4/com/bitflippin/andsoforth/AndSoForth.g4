@@ -1,13 +1,17 @@
 grammar AndSoForth;
 
 command
-  : identifierCommand
+  : dataCommand
+  | identifierCommand
   ;
 
 commandBlock
   : BeginKeyword command* EndKeyword
   ;
 
+dataCommand
+  : OpenParen command* CloseParen
+  ;
 
 identifierCommand
   : Identifier
@@ -29,12 +33,20 @@ BeginKeyword
   : '/begin'
   ;
 
+CloseParen
+  : ')'
+  ;
+
 EndKeyword
   : '/end'
   ;
 
 MacroKeyword
   : '/macro'
+  ;
+
+OpenParen
+  : '('
   ;
 
 Whitespace

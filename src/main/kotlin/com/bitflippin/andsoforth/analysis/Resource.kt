@@ -49,7 +49,7 @@ class Resource(private val sourceCode: String) {
     fun populateObjects(targetEnvironment: Environment) {
         root.macroContexts.forEach { macroContext ->
             val macro = targetEnvironment.macros[macroContext.name] ?: throw IllegalStateException()
-            macroContext.commandContexts.forEach { macro.commands += targetEnvironment.macros[it.text] ?: throw IllegalStateException() }
+            macro.commands += macroContext.commandContexts.toCommands(targetEnvironment)
         }
     }
 }

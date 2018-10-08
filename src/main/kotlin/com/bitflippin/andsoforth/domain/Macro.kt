@@ -1,5 +1,5 @@
 package com.bitflippin.andsoforth.domain
 
-class Macro {
-    val commands = mutableListOf<Any>()
+class Macro : Command {
+    val commands = mutableListOf<Command>()
 }

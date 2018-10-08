@@ -1,13 +1,13 @@
 package com.bitflippin.andsoforth.analysis
 
+import com.bitflippin.andsoforth.domain.DataCommand
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class MacroAnalysisTest {
 
     /**
-     * An appropriate model is constructed for a macro that has no commands
-     * in it.
+     * Macros may contain no commands.
      */
     @Test
     fun empty() {
@@ -20,8 +20,7 @@ class MacroAnalysisTest {
     }
 
     /**
-     * Appropriate models are constructed for two macros that reference each
-     * other.
+     * Two macros may contain references to each other.
      */
     @Test
     fun circular() {
@@ -36,8 +35,7 @@ class MacroAnalysisTest {
     }
 
     /**
-     * An appropriate model is constructed for a macro that contains multiple
-     * commands.
+     * A macro may contain multiple commands.
      */
     @Test
     fun multipleCommands() {
@@ -51,7 +49,7 @@ class MacroAnalysisTest {
     }
 
     /**
-     * An appropriate model is constructed for a macro that references itself.
+     * A macro can contain a command that references itself.
      */
     @Test
     fun recursive() {
@@ -61,5 +59,52 @@ class MacroAnalysisTest {
         val macro = environment.macros.getValue("Macro")
         // And is its own command
         assertEquals(listOf(macro), macro.commands)
+    }
+
+    /**
+     * A macro may push commands onto the data stack.
+     */
+    @Test
+    fun dataCommand() {
+        val code = "/macro Macro /begin (Macro) /end"
+        val environment = environment(code)
+        // The model exists, and has a push command
+        val macro = environment.macros.getValue("Macro")
+        val push = macro.commands[0] as DataCommand
+        // And the data being pushed is the macro
+        assertEquals(listOf(macro), push.data)
+    }
+
+    /**
+     * A macro may push commands onto the data stack that push commands onto
+     * the data stack.
+     */
+    @Test
+    fun dataCommandData() {
+        val code = "/macro Macro /begin ((Macro)) /end"
+        val environment = environment(code)
+        // The model exists, and has a push command
+        val macro = environment.macros.getValue("Macro")
+        val outerPush = macro.commands[0] as DataCommand
+        // And the data being pushed is another push command
+        val innerPush = outerPush.data[0] as DataCommand
+        // That pushes the macro
+        assertEquals(listOf(macro), innerPush.data)
+    }
+
+    /**
+     * A macro may push multiple commands onto the stack.
+     */
+    @Test
+    fun multipleData() {
+        val code = "/macro M /begin (X Y) /macro X /begin /end /macro Y /begin /end"
+        val environment = environment(code)
+        // The model exists, and has a push command
+        val macro = environment.macros.getValue("M")
+        val push = macro.commands[0] as DataCommand
+        // And the data being pushed is another push command
+        val x = environment.macros.getValue("X")
+        val y = environment.macros.getValue("Y")
+        assertEquals(listOf(x, y), push.data)
     }
 }
